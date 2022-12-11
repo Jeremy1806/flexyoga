@@ -7,12 +7,30 @@ from rest_framework.response import Response
 # Create your views here.
 
 
+@api_view(['POST'])
+def create(request, **kwargs):
+    email = request.data.get('email', None)
+    if email is not None:
+        try:
+            person = People.objects.get(email=email)
+            return Response({"success": False, "message": "Customer already exists with given Email"})
+        except:
+
+            people_serializer = PeopleSerializer(data=request.data)
+            people_serializer.is_valid(raise_exception=True)
+            try:
+                people_serializer.save()
+                check = People.objects.get(email=email)
+                return Response({"success": True, "message": f"Customer created with Email : {check.email}"})
+            except:
+                return Response({"message": "Server Error"})
+
+
 @api_view(['PUT'])
 def make_payment(request,  **kwargs):
     email = request.data.get('email', None)
 
     if email is not None:
-        print("STARTTTTT")
         try:
             person = People.objects.get(email=email)
         except:
@@ -29,32 +47,3 @@ def make_payment(request,  **kwargs):
             person.save()
 
         return Response({"email": email, "fee": person.fees, "date_paid": person.date})
-
-    # email = request.data.get("email")
-
-    # person = People.objects.filter(email__contains=email)
-    # print(person.values())
-    # # new user trying to pay fee {ok
-    # if person.exists() is False:
-    #     return Response({"msg": "User is new , Please do the enrollment "})
-    # # print(person.values()[0])
-    # json_data = person.values()[0]
-    # # request.data['id'] = json_data.get('id')
-    # # print(json_data.get('fees'))
-    # fees_paid = json_data.get('fees')
-    # old_date = json_data.get('date')
-
-    # if fees_paid is False:
-    #     request.data['fees'] = True
-    #     request.data['date'] = datetime.now()
-    #     print(request.data)
-    #     temp = []
-    #     temp.append(request.data)
-    #     serializer = PeopleSerializer(person, data=temp, many=True)
-    #     print("testing........")
-    #     # print(serializer.is_valid)
-    #     if serializer.is_valid():
-    #         print("working")
-    #         serializer.save()
-    #     else:
-    #         return Response({"msg": "Fee Paid1", "data": serializer.data})

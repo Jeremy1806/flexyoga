@@ -21,6 +21,7 @@ from django.conf.urls import include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include([
-        path('pay', enroll.views.make_payment, name='fee_pay')
+        path('pay', enroll.views.make_payment, name='fee_pay'),
+        path('enroll', enroll.views.create, name='enroll_person')
     ]))
 ]
