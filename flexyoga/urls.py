@@ -22,6 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include([
         path('pay', enroll.views.make_payment, name='fee_pay'),
-        path('enroll', enroll.views.create, name='enroll_person')
+        path('enroll', enroll.views.create, name='enroll_person'),
+        path('batch', enroll.views.update_batch, name='update_batch')
     ]))
 ]

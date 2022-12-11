@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework.decorators import api_view
 from enroll.models import People
 from .serializer import PeopleSerializer
@@ -37,13 +36,33 @@ def make_payment(request,  **kwargs):
             return Response({"msg": "User is new , Please do the enrollment "})
         print(person.email)
         fees_paid = person.fees
-        old_date = person.date
 
         if fees_paid:
             return Response({"message": "Fees Already Paid"})
         else:
             person.fees = True
-            person.date = datetime.now()
             person.save()
 
-        return Response({"email": email, "fee": person.fees, "date_paid": person.date})
+        return Response({"success": True, "message": "Fees paid successfully"})
+
+
+@api_view(['PUT'])
+def update_batch(request, **kwargs):
+    email = request.data.get('email', None)
+    batch = request.data.get('batch', None)
+
+    if not batch or not email:
+        return Response({"success": False, "message": "Email or batch missing from request"})
+
+    person = People.objects.get(email=email)
+    last_changed = person.date
+    print(last_changed)
+    today = datetime.now()
+
+    if today.month != last_changed.month:
+        person.date = today
+        person.batch = request.data.get("batch")
+        person.save()
+        return Response({"success": True, "message": "Your batch has been changed"})
+    else:
+        return Response({"success": False, "message": "You cannot change batch this month"})
