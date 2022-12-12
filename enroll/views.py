@@ -8,14 +8,16 @@ from rest_framework.response import Response
 
 @api_view(['POST'])
 def create(request, **kwargs):
-    email = request.data.get('email', None)
+    request = request.data['body']
+    print(request['email'])
+    email = request.get('email', None)
     if email is not None:
         try:
             person = People.objects.get(email=email)
             return Response({"success": False, "message": "Customer already exists with given Email"})
         except:
 
-            people_serializer = PeopleSerializer(data=request.data)
+            people_serializer = PeopleSerializer(data=request)
             people_serializer.is_valid(raise_exception=True)
             try:
                 people_serializer.save()
@@ -27,7 +29,9 @@ def create(request, **kwargs):
 
 @api_view(['PUT'])
 def make_payment(request,  **kwargs):
-    email = request.data.get('email', None)
+    request = request.data['body']
+    print(request['email'])
+    email = request.get('email', None)
 
     if email is not None:
         try:
@@ -36,20 +40,26 @@ def make_payment(request,  **kwargs):
             return Response({"msg": "User is new , Please do the enrollment "})
         print(person.email)
         fees_paid = person.fees
+        old_date = person.fee_date
 
         if fees_paid:
             return Response({"message": "Fees Already Paid"})
-        else:
+        elif old_date.month != datetime.now().month:
             person.fees = True
+            person.fee_date = datetime.now()
             person.save()
+        else:
+            return Response({"message": "Fees Already Paid"})
 
         return Response({"success": True, "message": "Fees paid successfully"})
 
 
 @api_view(['PUT'])
 def update_batch(request, **kwargs):
-    email = request.data.get('email', None)
-    batch = request.data.get('batch', None)
+    request = request.data['body']
+    print(request['email'])
+    email = request.get('email', None)
+    batch = request.get('batch', None)
 
     if not batch or not email:
         return Response({"success": False, "message": "Email or batch missing from request"})
@@ -61,7 +71,7 @@ def update_batch(request, **kwargs):
 
     if today.month != last_changed.month:
         person.date = today
-        person.batch = request.data.get("batch")
+        person.batch = request.get("batch")
         person.save()
         return Response({"success": True, "message": "Your batch has been changed"})
     else:

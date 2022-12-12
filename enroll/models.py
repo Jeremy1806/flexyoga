@@ -10,8 +10,9 @@ class People(models.Model):
     age = models.IntegerField()
     email = models.EmailField(unique=True)
     batch = models.CharField(max_length=100)
-    date = models.DateField(default=datetime.now)
+    date = models.DateField(default=datetime.now())
     fees = models.BooleanField(default=False)
+    fee_date = models.DateField(default=datetime.now())
 
     def _str_(self):
         return self.name
